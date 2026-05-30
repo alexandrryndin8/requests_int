@@ -99,12 +99,12 @@
         <div v-if="role === 'school'">
           <label class="mb-2 block text-sm font-semibold text-slate-900">Выберите класс</label>
           <div class="mb-2 flex flex-wrap gap-2">
-            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" :class="grade === num.toString() ? 'bg-[#F26C4F] text-white hover:bg-[#cc5d44]' : ''" v-for="num in 12" :key="num" @click="grade = num.toString()">
+            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white" :class="grade === num.toString() ? '!bg-[#3FB1F3] text-white shadow-sm' : ''" v-for="num in 12" :key="num" @click="grade = num.toString()">
               {{ num }}
             </button>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" :class="letter === l && 'bg-[#F26C4F] text-white hover:bg-[#cc5d44]'" v-for="l in letters" :key="l" @click="letter = l">
+            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white" :class="letter === l && '!bg-[#3FB1F3] text-white shadow-sm'" v-for="l in letters" :key="l" @click="letter = l">
               {{ l }}
             </button>
           </div>
@@ -129,8 +129,8 @@
         <div v-else-if="role === 'staff'">
           <label for="group" class="mb-2 block text-sm font-semibold text-slate-900">Выберите подразделение</label>
           <div class="flex flex-wrap gap-2">
-            <button v-for="department in staffDepartments" :key="department" type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-              :class="staffGroup === department ? 'bg-[#F26C4F] text-white hover:bg-[#cc5d44]' : ''" @click="staffGroup = department" >{{ department }}</button>
+            <button v-for="department in staffDepartments" :key="department" type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white"
+              :class="staffGroup === department ? '!bg-[#3FB1F3] text-white shadow-sm' : ''" @click="staffGroup = department" >{{ department }}</button>
           </div>
         </div>
 
@@ -179,8 +179,8 @@
           <p class="break-words font-mono text-lg text-blue-600">Трек-номер: {{ track_id }}</p>
           <p class="break-words font-mono text-lg text-blue-600">Пароль: {{ password }}</p>
         </div>
-        <button @click="copyTrackAndPassword" class="button_admin mb-2 w-full rounded-xl bg-[#F26C4F] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#cc5d44]">Скопировать трек и пароль</button>
-        <button @click="showModal = false" class="button_admin w-full rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-200">Закрыть</button>
+        <button @click="copyTrackAndPassword" class="button_admin mb-2 w-full rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-[#318fc6] text-white bg-[#3FB1F3] transition ">Скопировать трек и пароль</button>
+        <button @click="showModal = false" class="button_admin w-full rounded-xl hover:bg-[#318fc6] text-white bg-[#3FB1F3] px-4 py-2.5 text-sm font-semibold transition">Закрыть</button>
       </div>
     </div>
 
@@ -189,7 +189,7 @@
       <div class="w-full max-w-sm overflow-hidden rounded-2xl bg-white text-center shadow-2xl">
         <h2 class="px-5 pt-5 text-lg font-bold text-slate-900">Доступные продукты</h2>
         <img src="public\img\products.png" class="w-full px-5 py-4" alt="Доступные продукты" />
-        <button @click="showModalProducts = false" class="button_admin mb-5 rounded-xl bg-[#F26C4F] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#cc5d44]">Закрыть</button>
+        <button @click="showModalProducts = false" class="button_admin mb-5 rounded-xl px-5 py-2.5 text-sm font-semibold transition hover:bg-[#318fc6] text-white bg-[#3FB1F3]">Закрыть</button>
       </div>
     </div>
   </main>
