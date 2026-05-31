@@ -49,10 +49,23 @@ export default defineEventHandler(async (event) => {
   }
 
   const products = await prisma.products.findMany({
-    where: { isAvailable: true },
-    select: { name: true, price: true }
+    select: { name: true, price: true, updated_at: true }
   })
-  const priceMap = new Map(products.map((p) => [p.name, p.price]))
+  const priceByName = new Map<string, { price: number; updated_at: Date }>()
+
+  for (const product of products) {
+    const existing = priceByName.get(product.name)
+    if (!existing || product.updated_at > existing.updated_at) {
+      priceByName.set(product.name, {
+        price: product.price,
+        updated_at: product.updated_at
+      })
+    }
+  }
+
+  const priceMap = new Map(
+    Array.from(priceByName.entries()).map(([name, value]) => [name, value.price])
+  )
 
   const createdRows = await prisma.requests.findMany({
     where: {
