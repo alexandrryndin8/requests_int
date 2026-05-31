@@ -2,8 +2,8 @@
   <main class="bg_custom relative z-10 flex min-h-[calc(100vh-5rem)] w-full items-center justify-center px-4 py-6 sm:px-6 lg:py-8">
     <form class="w-full max-w-xl overflow-hidden rounded-sm bg-white shadow-2xl shadow-slate-200/80 ring-1 ring-slate-200/70" @submit.prevent="postData">
       <header class="px-5 py-7 sm:px-10 sm:py-9">
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Заявка на устройство доступа</h1>
-        <p class="mt-2 text-sm font-medium text-slate-500">Заполните данные ниже, чтобы отправить заявку.</p>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ t.title }}</h1>
+        <p class="mt-2 text-sm font-medium text-slate-500">{{ t.subtitle }}</p>
       </header>
 
       <div class="relative h-px bg-slate-200">
@@ -12,67 +12,67 @@
 
       <section class="space-y-5 px-5 py-6 sm:px-10 sm:py-8">
         <div>
-          <label for="surname" class="mb-2 block text-sm font-semibold text-slate-900">Введите вашу фамилию</label>
+          <label for="surname" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.surnameLabel }}</label>
           <input
             type="text"
             id="surname"
-            placeholder="Иванов"
+            :placeholder="t.surnamePlaceholder"
             class="input_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10"
             v-model="postsurname"
             :class="errSurname && 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-500/10'"
             @blur="validateSurname"
             inputmode="text"
             :pattern="NAME_RE.source"
-            title="Только русские/казахские буквы и дефис"
+            :title="t.nameTitle"
           />
           <p v-if="errSurname" class="mt-1 text-xs text-red-600">{{ errSurname }}</p>
 
-          <label for="name" class="mb-2 mt-3 block text-sm font-semibold text-slate-900">Введите ваше имя</label>
+          <label for="name" class="mb-2 mt-3 block text-sm font-semibold text-slate-900">{{ t.nameLabel }}</label>
           <input
             type="text"
             id="name"
-            placeholder="Иван"
+            :placeholder="t.namePlaceholder"
             class="input_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10"
             v-model="postname"
             :class="errName && 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-500/10'"
             @blur="validateFirstName"
             inputmode="text"
             :pattern="NAME_RE.source"
-            title="Только русские/казахские буквы и дефис"
+            :title="t.nameTitle"
           />
           <p v-if="errName" class="mt-1 text-xs text-red-600">{{ errName }}</p>
 
-          <label for="patro" class="mb-2 mt-3 block text-sm font-semibold text-slate-900">Введите ваше отчество</label>
+          <label for="patro" class="mb-2 mt-3 block text-sm font-semibold text-slate-900">{{ t.patronymicLabel }}</label>
           <input
             type="text"
             id="patro"
-            placeholder="Иванович"
+            :placeholder="t.patronymicPlaceholder"
             class="input_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10"
             v-model="postpatronymic"
             :class="errPatronymic && 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-500/10'"
             @blur="validatePatronymic"
             inputmode="text"
             :pattern="NAME_RE.source"
-            title="Только русские/казахские буквы и дефис"
+            :title="t.nameTitle"
           />
           <p v-if="errPatronymic" class="mt-1 text-xs text-red-600">{{ errPatronymic }}</p>
         </div>
 
         <div>
-          <label class="mb-2 block text-sm font-semibold text-slate-900">Выберите вашу роль</label>
+          <label class="mb-2 block text-sm font-semibold text-slate-900">{{ t.roleLabel }}</label>
           <div class="grid grid-cols-3 gap-2 rounded-md bg-slate-100 p-1">
-            <button type="button" class="rounded px-2 py-2.5 text-sm font-semibold text-slate-900 transition" :class="role === 'school' ? 'bg-[#3FB1F3] text-white shadow-sm' : 'hover:bg-white'" @click="setRole('school')">Школьник</button>
-            <button type="button" class="rounded px-2 py-2.5 text-sm font-semibold text-slate-900 transition" :class="role === 'student' ? 'bg-[#3FB1F3] text-white shadow-sm' : 'hover:bg-white'" @click="setRole('student')">Студент</button>
-            <button type="button" class="rounded px-2 py-2.5 text-sm font-semibold text-slate-900 transition" :class="role === 'staff' ? 'bg-[#3FB1F3] text-white shadow-sm' : 'hover:bg-white'" @click="setRole('staff')">Сотрудник</button>
+            <button type="button" class="rounded px-2 py-2.5 text-sm font-semibold text-slate-900 transition" :class="role === 'school' ? 'bg-[#3FB1F3] text-white shadow-sm' : 'hover:bg-white'" @click="setRole('school')">{{ t.schoolRole }}</button>
+            <button type="button" class="rounded px-2 py-2.5 text-sm font-semibold text-slate-900 transition" :class="role === 'student' ? 'bg-[#3FB1F3] text-white shadow-sm' : 'hover:bg-white'" @click="setRole('student')">{{ t.studentRole }}</button>
+            <button type="button" class="rounded px-2 py-2.5 text-sm font-semibold text-slate-900 transition" :class="role === 'staff' ? 'bg-[#3FB1F3] text-white shadow-sm' : 'hover:bg-white'" @click="setRole('staff')">{{ t.staffRole }}</button>
           </div>
         </div>
 
         <div>
-          <label for="school" class="mb-2 block text-sm font-semibold text-slate-900">Выберите учебное заведение</label>
+          <label for="school" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.schoolLabel }}</label>
 
           <div v-if="postschool" class="flex items-center justify-between gap-3 rounded-md bg-slate-100 px-3 py-2.5 text-sm">
             <span class="min-w-0 break-words text-slate-900">{{ postschool }}</span>
-            <button type="button" @click="cancelSchool" class="shrink-0 font-semibold text-slate-500 hover:text-slate-900">Отменить</button>
+            <button type="button" @click="cancelSchool" class="shrink-0 font-semibold text-slate-500 hover:text-slate-900">{{ t.cancel }}</button>
           </div>
 
           <div v-else>
@@ -80,7 +80,7 @@
               type="text"
               id="school"
               class="input_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10"
-              placeholder="Поиск учебных заведений"
+              :placeholder="t.schoolSearchPlaceholder"
               v-model="schoolSearch"
             />
             <div class="mt-2 max-h-44 overflow-y-auto rounded-md bg-slate-50 p-1">
@@ -97,21 +97,21 @@
         </div>
 
         <div v-if="role === 'school'">
-          <label class="mb-2 block text-sm font-semibold text-slate-900">Выберите класс</label>
+          <label class="mb-2 block text-sm font-semibold text-slate-900">{{ t.gradeLabel }}</label>
           <div class="mb-2 flex flex-wrap gap-2">
-            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" :class="grade === num.toString() ? 'bg-[#F26C4F] text-white hover:bg-[#cc5d44]' : ''" v-for="num in 12" :key="num" @click="grade = num.toString()">
+            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white" :class="grade === num.toString() ? '!bg-[#3FB1F3] text-white shadow-sm' : ''" v-for="num in 12" :key="num" @click="grade = num.toString()">
               {{ num }}
             </button>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" :class="letter === l && 'bg-[#F26C4F] text-white hover:bg-[#cc5d44]'" v-for="l in letters" :key="l" @click="letter = l">
+            <button type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white" :class="letter === l && '!bg-[#3FB1F3] text-white shadow-sm'" v-for="l in letters" :key="l" @click="letter = l">
               {{ l }}
             </button>
           </div>
         </div>
 
         <div v-else-if="role === 'student'">
-          <label for="group" class="mb-2 block text-sm font-semibold text-slate-900">Введите группу</label>
+          <label for="group" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.groupLabel }}</label>
           <input
             type="text"
             id="group"
@@ -121,75 +121,75 @@
             :class="errGroup && 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-500/10'"
             @blur="validateGroup"
             :pattern="GROUP_RE.source"
-            title="Буквы, цифры, пробел, - _ ( ) / (2–32 символа)"
+            :title="t.groupTitle"
           />
           <p v-if="errGroup" class="mt-1 text-xs text-red-600">{{ errGroup }}</p>
         </div>
 
         <div v-else-if="role === 'staff'">
-          <label for="group" class="mb-2 block text-sm font-semibold text-slate-900">Выберите подразделение</label>
+          <label for="group" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.departmentLabel }}</label>
           <div class="flex flex-wrap gap-2">
-            <button v-for="department in staffDepartments" :key="department" type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-              :class="staffGroup === department ? 'bg-[#F26C4F] text-white hover:bg-[#cc5d44]' : ''" @click="staffGroup = department" >{{ department }}</button>
+            <button v-for="department in staffDepartments" :key="department" type="button" class="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white"
+              :class="staffGroup === department ? '!bg-[#3FB1F3] text-white shadow-sm' : ''" @click="staffGroup = department" >{{ departmentLabel(department) }}</button>
           </div>
         </div>
 
         <div>
-          <label for="products" class="mb-2 block text-sm font-semibold text-slate-900">Выберите устройство доступа</label>
+          <label for="products" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.productLabel }}</label>
           <select id="products" class="select_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10 disabled:bg-slate-100 disabled:text-slate-500" v-model="productType" :disabled="products.length === 0">
             <option v-if="products.length === 0" value="">
-              Нет доступных устройств
+              {{ t.noProducts }}
             </option>
             <option v-for="p in products" :key="p.code" :value="p.name">
-              {{ p.name }} ({{ p.price }} тенге)
+              {{ productLabel(p.name) }} ({{ p.price }} {{ t.tenge }})
             </option>
           </select>
 
           <div v-if="productType === 'Браслет'" class="mt-3">
-            <label for="braceletColor" class="mb-2 block text-sm font-semibold text-slate-900">Выберите цвет браслета</label>
+            <label for="braceletColor" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.braceletColorLabel }}</label>
             <select id="braceletColor" class="select_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10" v-model="braceletColor">
               <option v-for="color in braceletColors" :key="color" :value="color">
-                {{ color }}
+                {{ colorLabel(color) }}
               </option>
             </select>
           </div>
         </div>
 
         <button type="button" @click="showModalProductsFunction" class="text-sm font-medium text-slate-500 underline underline-offset-4 transition hover:text-slate-900">
-          Посмотреть продукты
+          {{ t.viewProducts }}
         </button>
 
-        <button class="w-full rounded px-6 py-3 text-sm font-semibold  shadow-lg shadow-slate-900/15 transition-transform hover:bg-[#318fc6] text-white bg-[#3FB1F3] active:scale-95" type="submit">Оставить заявку</button>
+        <button class="w-full rounded px-6 py-3 text-sm font-semibold  shadow-lg shadow-slate-900/15 transition-transform hover:bg-[#318fc6] text-white bg-[#3FB1F3] active:scale-95" type="submit">{{ t.submit }}</button>
       </section>
     </form>
 
     <!-- Модальное окно загрузки -->
     <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl animate-pulse">
-        <p class="text-lg font-semibold text-gray-900">Загрузка…</p>
-        <p class="mt-2 text-sm leading-6 text-gray-600">Если загрузка не заканчивается попробуйте почистить кэш и куки и подать еще раз</p>
+        <p class="text-lg font-semibold text-gray-900">{{ t.loading }}</p>
+        <p class="mt-2 text-sm leading-6 text-gray-600">{{ t.loadingHelp }}</p>
       </div>
     </div>
 
     <!-- Модальное окно после заявки -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div class="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
-        <h2 class="text-xl font-bold text-slate-900">Заявка отправлена!</h2>
+        <h2 class="text-xl font-bold text-slate-900">{{ t.requestSent }}</h2>
         <div class="my-5 space-y-2 rounded-xl bg-gray-50 p-4">
-          <p class="break-words font-mono text-lg text-blue-600">Трек-номер: {{ track_id }}</p>
-          <p class="break-words font-mono text-lg text-blue-600">Пароль: {{ password }}</p>
+          <p class="break-words font-mono text-lg text-blue-600">{{ t.trackNumber }}: {{ track_id }}</p>
+          <p class="break-words font-mono text-lg text-blue-600">{{ t.password }}: {{ password }}</p>
         </div>
-        <button @click="copyTrackAndPassword" class="button_admin mb-2 w-full rounded-xl bg-[#F26C4F] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#cc5d44]">Скопировать трек и пароль</button>
-        <button @click="showModal = false" class="button_admin w-full rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-200">Закрыть</button>
+        <button @click="copyTrackAndPassword" class="button_admin mb-2 w-full rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-[#318fc6] text-white bg-[#3FB1F3] transition ">{{ t.copyTrackPassword }}</button>
+        <button @click="showModal = false" class="button_admin w-full rounded-xl hover:bg-[#318fc6] text-white bg-[#3FB1F3] px-4 py-2.5 text-sm font-semibold transition">{{ t.close }}</button>
       </div>
     </div>
 
     <!-- Модальное окно посмотреть товары -->
     <div v-if="showModalProducts" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div class="w-full max-w-sm overflow-hidden rounded-2xl bg-white text-center shadow-2xl">
-        <h2 class="px-5 pt-5 text-lg font-bold text-slate-900">Доступные продукты</h2>
-        <img src="public\img\products.png" class="w-full px-5 py-4" alt="Доступные продукты" />
-        <button @click="showModalProducts = false" class="button_admin mb-5 rounded-xl bg-[#F26C4F] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#cc5d44]">Закрыть</button>
+        <h2 class="px-5 pt-5 text-lg font-bold text-slate-900">{{ t.availableProducts }}</h2>
+        <img src="public\img\products.png" class="w-full px-5 py-4" :alt="t.availableProducts" />
+        <button @click="showModalProducts = false" class="button_admin mb-5 rounded-xl px-5 py-2.5 text-sm font-semibold transition hover:bg-[#318fc6] text-white bg-[#3FB1F3]">{{ t.close }}</button>
       </div>
     </div>
   </main>
@@ -200,14 +200,139 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRuntimeConfig } from '#imports'
 
+const { selectedLanguage } = useSiteLanguage()
+
+const translations = {
+  ru: {
+    title: 'Заявка на устройство доступа',
+    subtitle: 'Есть вопросы? Нажмите на знак вопроса справа снизу для онлайн консультации',
+    surnameLabel: 'Введите вашу фамилию',
+    surnamePlaceholder: 'Иванов',
+    nameLabel: 'Введите ваше имя',
+    namePlaceholder: 'Иван',
+    patronymicLabel: 'Введите ваше отчество',
+    patronymicPlaceholder: 'Иванович',
+    nameTitle: 'Только русские/казахские буквы и дефис',
+    roleLabel: 'Выберите вашу роль',
+    schoolRole: 'Школьник',
+    studentRole: 'Студент',
+    staffRole: 'Сотрудник',
+    schoolLabel: 'Выберите учебное заведение',
+    cancel: 'Отменить',
+    schoolSearchPlaceholder: 'Поиск учебных заведений',
+    gradeLabel: 'Выберите класс',
+    groupLabel: 'Введите группу',
+    groupTitle: 'Буквы, цифры, пробел, - _ ( ) / (2-32 символа)',
+    departmentLabel: 'Выберите подразделение',
+    productLabel: 'Выберите устройство доступа',
+    noProducts: 'Нет доступных устройств',
+    tenge: 'тенге',
+    braceletColorLabel: 'Выберите цвет браслета',
+    viewProducts: 'Посмотреть продукты',
+    submit: 'Оставить заявку',
+    loading: 'Загрузка...',
+    loadingHelp: 'Если загрузка не заканчивается, попробуйте почистить кэш и куки и подать еще раз',
+    requestSent: 'Заявка отправлена!',
+    trackNumber: 'Трек-номер',
+    password: 'Пароль',
+    copyTrackPassword: 'Скопировать трек и пароль',
+    close: 'Закрыть',
+    availableProducts: 'Доступные продукты',
+    nameLengthError: 'Должно быть от 2 до 50 символов',
+    nameLettersError: 'Только русские/казахские буквы и дефис',
+    groupRequiredError: 'Укажите группу',
+    groupFormatError: 'Можно: буквы, цифры, пробел, - _ ( ) / (2-32 симв.)',
+    checkFieldsAlert: 'Проверьте корректность полей',
+    fillAllAlert: 'Пожалуйста, заполните все поля заявки',
+    recaptchaError: 'Ошибка проверки reCAPTCHA. Пожалуйста, попробуйте еще раз.',
+    duplicateAlert: 'Ваша заявка уже подана и находится в обработке.',
+    submitError: 'Произошла ошибка при отправке формы: ',
+    unknownError: 'Неизвестная ошибка',
+    copiedAlert: 'Трек и пароль скопированы в буфер обмена',
+    copyErrorAlert: 'Ошибка при копировании',
+  },
+  kk: {
+    title: 'Қолжетімділік құрылғысына өтінім',
+    subtitle: 'Сұрақтарыңыз бар ма? Онлайн кеңес алу үшін төменгі оң жақтағы сұрақ белгісін басыңыз',
+    surnameLabel: 'Тегіңізді енгізіңіз',
+    surnamePlaceholder: 'Иванов',
+    nameLabel: 'Атыңызды енгізіңіз',
+    namePlaceholder: 'Иван',
+    patronymicLabel: 'Әкеңіздің атын енгізіңіз',
+    patronymicPlaceholder: 'Иванович',
+    nameTitle: 'Тек орыс/қазақ әріптері және дефис',
+    roleLabel: 'Рөліңізді таңдаңыз',
+    schoolRole: 'Оқушы',
+    studentRole: 'Студент',
+    staffRole: 'Қызметкер',
+    schoolLabel: 'Оқу орнын таңдаңыз',
+    cancel: 'Болдырмау',
+    schoolSearchPlaceholder: 'Оқу орнын іздеу',
+    gradeLabel: 'Сыныпты таңдаңыз',
+    groupLabel: 'Топты енгізіңіз',
+    groupTitle: 'Әріптер, сандар, бос орын, - _ ( ) / (2-32 таңба)',
+    departmentLabel: 'Бөлімшені таңдаңыз',
+    productLabel: 'Қолжетімділік құрылғысын таңдаңыз',
+    noProducts: 'Қолжетімді құрылғылар жоқ',
+    tenge: 'теңге',
+    braceletColorLabel: 'Білезіктің түсін таңдаңыз',
+    viewProducts: 'Өнімдерді қарау',
+    submit: 'Өтінім қалдыру',
+    loading: 'Жүктелуде...',
+    loadingHelp: 'Егер жүктеу аяқталмаса, кэш пен cookie файлдарын тазалап, қайта жіберіп көріңіз',
+    requestSent: 'Өтінім жіберілді!',
+    trackNumber: 'Трек-нөмір',
+    password: 'Құпиясөз',
+    copyTrackPassword: 'Трек пен құпиясөзді көшіру',
+    close: 'Жабу',
+    availableProducts: 'Қолжетімді өнімдер',
+    nameLengthError: '2-ден 50 таңбаға дейін болуы керек',
+    nameLettersError: 'Тек орыс/қазақ әріптері және дефис',
+    groupRequiredError: 'Топты көрсетіңіз',
+    groupFormatError: 'Болады: әріптер, сандар, бос орын, - _ ( ) / (2-32 таңба)',
+    checkFieldsAlert: 'Өрістердің дұрыс толтырылғанын тексеріңіз',
+    fillAllAlert: 'Өтінімнің барлық өрістерін толтырыңыз',
+    recaptchaError: 'reCAPTCHA тексеру қатесі. Қайтадан көріңіз.',
+    duplicateAlert: 'Сіздің өтініміңіз бұрын жіберілген және өңделіп жатыр.',
+    submitError: 'Форманы жіберу кезінде қате пайда болды: ',
+    unknownError: 'Белгісіз қате',
+    copiedAlert: 'Трек пен құпиясөз буферге көшірілді',
+    copyErrorAlert: 'Көшіру кезінде қате пайда болды',
+  },
+}
+
+const t = computed(() => translations[selectedLanguage.value])
+const departmentTranslations: Record<string, { ru: string; kk: string }> = {
+  'Администрация': { ru: 'Администрация', kk: 'Әкімшілік' },
+  'Пед. состав': { ru: 'Пед. состав', kk: 'Пед. құрам' },
+  'Тех. персонал': { ru: 'Тех. персонал', kk: 'Тех. персонал' },
+  'Другое': { ru: 'Другое', kk: 'Басқа' },
+}
+const productTranslations: Record<string, { ru: string; kk: string }> = {
+  'Карта': { ru: 'Карта', kk: 'Карта' },
+  'Браслет': { ru: 'Браслет', kk: 'Білезік' },
+  'Брелок': { ru: 'Брелок', kk: 'Салпыншақ' },
+}
+const colorTranslations: Record<string, { ru: string; kk: string }> = {
+  'Черный': { ru: 'Черный', kk: 'Қара' },
+  'Белый': { ru: 'Белый', kk: 'Ақ' },
+  'Красный': { ru: 'Красный', kk: 'Қызыл' },
+  'Синий': { ru: 'Синий', kk: 'Көк' },
+  'Зеленый': { ru: 'Зеленый', kk: 'Жасыл' },
+  'Желтый': { ru: 'Желтый', kk: 'Сары' },
+}
+const departmentLabel = (department: string) => departmentTranslations[department]?.[selectedLanguage.value] || department
+const productLabel = (product: string) => productTranslations[product]?.[selectedLanguage.value] || product
+const colorLabel = (color: string) => colorTranslations[color]?.[selectedLanguage.value] || color
+
 // Разрешаем только рус/каз буквы + дефис, длина 2–50
 const NAME_RE = /^[А-ЯЁӘІҢҒҚӨҰҮҺа-яёәіңғқөұүһ\-]+$/u
 const GROUP_RE = /^[A-Za-zА-ЯЁӘІҢҒҚӨҰҮҺа-яёәіңғқөұүһ0-9()_\-\/ ]{2,32}$/u
 
 function validateNamePart(s: string) {
   const v = (s || '').trim()
-  if (v.length < 2 || v.length > 50) return 'Должно быть от 2 до 50 символов'
-  if (!NAME_RE.test(v)) return 'Только русские/казахские буквы и дефис'
+  if (v.length < 2 || v.length > 50) return t.value.nameLengthError
+  if (!NAME_RE.test(v)) return t.value.nameLettersError
   return '' // ок
 }
 
@@ -232,8 +357,8 @@ function validatePatronymic() {
 }
 function validateGroup() {
   const v = normalizeGroup(group.value)
-  if (!v) { errGroup.value = 'Укажите группу'; return }
-  errGroup.value = GROUP_RE.test(v) ? '' : 'Можно: буквы, цифры, пробел, - _ ( ) / (2–32 симв.)'
+  if (!v) { errGroup.value = t.value.groupRequiredError; return }
+  errGroup.value = GROUP_RE.test(v) ? '' : t.value.groupFormatError
   group.value = v
 }
 
@@ -457,14 +582,14 @@ const postData = async () => {
   }
 
   if (errSurname.value || errName.value || (role.value === 'student' && errGroup?.value)) {
-    alert('Проверьте корректность полей')
+    alert(t.value.checkFieldsAlert)
     return
   }
   isLoading.value = true                 
   try {
     const postfull_name = computed(() => getFullName(postsurname.value, postname.value, postpatronymic.value))
     if (!postfull_name.value || !postschool.value || !postclass.value || !postdevice_type.value) {
-      alert('Пожалуйста, заполните все поля заявки')
+      alert(t.value.fillAllAlert)
       return
     }
 
@@ -490,11 +615,11 @@ const postData = async () => {
   } catch (error: any) {
     console.error('Ошибка при отправке формы:', error)
     if (error.statusCode === 403) {
-      alert('Ошибка проверки reCAPTCHA. Пожалуйста, попробуйте еще раз.')
+      alert(t.value.recaptchaError)
     } else if (error.statusCode === 409) {
-      alert('Ваша заявка уже подана и находится в обработке.')
+      alert(t.value.duplicateAlert)
     } else {
-      alert('Произошла ошибка при отправке формы: ' + (error.message || 'Неизвестная ошибка'))
+      alert(t.value.submitError + (error.message || t.value.unknownError))
     }
   } finally {
     isLoading.value = false              // ← критично: всегда выключаем спиннер
@@ -504,11 +629,11 @@ const postData = async () => {
 // Копирование трек номера и пароля
 const copyTrackAndPassword = () => {
   if (track_id.value && password.value) {
-    const textToCopy = `Трек: ${track_id.value}, Пароль: ${password.value}`
+    const textToCopy = `${t.value.trackNumber}: ${track_id.value}, ${t.value.password}: ${password.value}`
     navigator.clipboard.writeText(textToCopy).then(() => {
-      alert('Трек и пароль скопированы в буфер обмена')
+      alert(t.value.copiedAlert)
     }).catch(() => {
-      alert('Ошибка при копировании')
+      alert(t.value.copyErrorAlert)
     })
   }
 }

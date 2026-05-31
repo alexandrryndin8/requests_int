@@ -1,31 +1,99 @@
 <template>
-    <main class='bg_custom min-h-screen items-center z-10 flex flex-col justify-center'>
-      <div class="div_request m-5 h-2/6 max-sm:h-5/6 mb-96">
-        <p class="mt-5 text-gray-900 mb-5">Проверить статус заявки</p>
-        <form @submit.prevent='trackRequest'>
-          <div class="mb-5">
-            <input  type="text" id="track_id" placeholder='Введите трек-номер (12 символов)' 
-            class="input_request" v-model="track" maxlength="12">
-          </div>
-          <div class="mb-5">
-            <input type="text" id="password" placeholder='Введите пароль (8 символов)' 
-            class="input_request" v-model="password" maxlength="8">
-          </div>
-          <button class="button" type="submit">Отследить</button>
-        </form>
-          <p :class="statusResult?.toLowerCase().includes('выполнен') ? 'text-green-500 font-semibold' : statusResult?.toLowerCase().includes('выдан') ? 'text-green-500 font-semibold' :  statusResult?.toLowerCase().includes('отклонен') ? 'text-center text-red-500 font-semibold mb-5' : 'text-gray-900 mb-5'">
-            Статус вашего заказа: {{ statusResult }}
-          </p>
-          <p v-if="statusResult?.toLowerCase().includes('выполнен')" class="text-center text-green-500 text-sm mt-1 mb-5">Забрать его можно по адресу ул. Карима Сутюшева 53 в будние дни с 09:00 до 18:00</p>
-          <p v-if="statusResult?.toLowerCase().includes('выдан')" class="text-center text-green-500 text-sm mb-5 ">Приятного пользования!</p>
+  <main class="bg_custom relative z-10 flex min-h-[calc(100vh-5rem)] w-full items-center justify-center px-4 py-6 sm:px-6 lg:py-8">
+    <section class="w-full max-w-xl overflow-hidden rounded-sm bg-white shadow-2xl shadow-slate-200/80 ring-1 ring-slate-200/70">
+      <header class="px-5 py-7 sm:px-10 sm:py-9">
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ t.title }}</h1>
+        <p class="mt-2 text-sm font-medium text-slate-500">{{ t.subtitle }}</p>
+      </header>
+
+      <div class="relative h-px bg-slate-200">
+        <div class="absolute left-5 top-0 h-px w-24 bg-[#3FB1F3] sm:left-10"></div>
       </div>
-    </main>
+
+      <div class="space-y-5 px-5 py-6 sm:px-10 sm:py-8">
+        <form class="space-y-5" @submit.prevent='trackRequest'>
+          <div>
+            <label for="track_id" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.trackNumber }}</label>
+            <input
+              type="text"
+              id="track_id"
+              :placeholder="t.trackPlaceholder"
+              class="input_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10"
+              v-model="track"
+              maxlength="12"
+            >
+          </div>
+
+          <div>
+            <label for="password" class="mb-2 block text-sm font-semibold text-slate-900">{{ t.password }}</label>
+            <input
+              type="text"
+              id="password"
+              :placeholder="t.passwordPlaceholder"
+              class="input_request w-full rounded-md border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#237fe5] focus:ring-2 focus:ring-[#237fe5]/10"
+              v-model="password"
+              maxlength="8"
+            >
+          </div>
+
+          <button class="w-full rounded px-6 py-3 text-sm font-semibold text-white bg-[#3FB1F3] shadow-lg shadow-slate-900/15 transition-transform hover:bg-[#318fc6] active:scale-95" type="submit">{{ t.submit }}</button>
+        </form>
+
+        <div class="rounded-md bg-slate-100 px-3 py-2.5 text-sm">
+          <p :class="isDoneStatus ? 'text-green-600 font-semibold' : isRejectedStatus ? 'text-red-600 font-semibold' : 'text-slate-900'">
+            {{ t.statusPrefix }}: {{ statusText }}{{ isAcceptedStatus ? t.acceptedSuffix : '' }}
+          </p>
+          <p v-if="isCompletedStatus" class="mt-2 text-sm font-medium text-green-600">{{ t.pickupText }}</p>
+          <p v-if="isIssuedStatus" class="mt-2 text-sm font-medium text-green-600">{{ t.issuedText }}</p>
+        </div>
+      </div>
+    </section>
+  </main>
 </template>
 
 <script setup lang='ts'>
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRuntimeConfig } from '#imports'
+
+const { selectedLanguage } = useSiteLanguage()
+
+const translations = {
+  ru: {
+    title: 'Проверить статус заявки',
+    subtitle: 'Введите трек-номер и пароль, чтобы узнать текущий статус.',
+    trackNumber: 'Трек-номер',
+    trackPlaceholder: 'Введите трек-номер (12 символов)',
+    password: 'Пароль',
+    passwordPlaceholder: 'Введите пароль (8 символов)',
+    submit: 'Отследить',
+    statusPrefix: 'Статус вашего заказа',
+    acceptedSuffix: ', ожидайте выполнения вашего заказа',
+    pickupText: 'Забрать его можно по адресу ул. Карима Сутюшева 53 в будние дни с 09:00 до 18:00',
+    issuedText: 'Приятного пользования!',
+    missingFieldsAlert: 'Введите трек-номер и пароль',
+    invalidLengthAlert: 'Некорректная длина трек-номера или пароля',
+    notFound: 'Заявка не найдена',
+  },
+  kk: {
+    title: 'Өтінім мәртебесін тексеру',
+    subtitle: 'Ағымдағы мәртебені білу үшін трек-нөмір мен құпиясөзді енгізіңіз.',
+    trackNumber: 'Трек-нөмір',
+    trackPlaceholder: 'Трек-нөмірді енгізіңіз (12 таңба)',
+    password: 'Құпиясөз',
+    passwordPlaceholder: 'Құпиясөзді енгізіңіз (8 таңба)',
+    submit: 'Тексеру',
+    statusPrefix: 'Тапсырысыңыздың мәртебесі',
+    acceptedSuffix: ', тапсырысыңыздың орындалуын күтіңіз',
+    pickupText: 'Оны Қ.Сүтюшев көшесі, 53 мекенжайынан жұмыс күндері 09:00-ден 18:00-ге дейін алуға болады',
+    issuedText: 'Қолдануыңызға сәттілік!',
+    missingFieldsAlert: 'Трек-нөмір мен құпиясөзді енгізіңіз',
+    invalidLengthAlert: 'Трек-нөмірдің немесе құпиясөздің ұзындығы дұрыс емес',
+    notFound: 'Өтінім табылмады',
+  },
+}
+
+const t = computed(() => translations[selectedLanguage.value])
 
 // Инициализация reCAPTCHA
 const recaptchaLoaded = ref(false)
@@ -93,16 +161,34 @@ onMounted(async () => {
 
 // Механизм проверки по трек номеру 
 const track = ref<string>('')
+const password = ref<string>('')
 const statusResult = ref<string | null>(null)
+const statusLower = computed(() => statusResult.value?.toLowerCase() || '')
+const isCompletedStatus = computed(() => statusLower.value.includes('выполнен'))
+const isIssuedStatus = computed(() => statusLower.value.includes('выдан'))
+const isAcceptedStatus = computed(() => statusLower.value.includes('принято'))
+const isRejectedStatus = computed(() => statusLower.value.includes('отклонен'))
+const isDoneStatus = computed(() => isCompletedStatus.value || isIssuedStatus.value)
+const statusText = computed(() => {
+  if (!statusResult.value) return ''
+  if (selectedLanguage.value === 'ru') return statusResult.value
+  if (isCompletedStatus.value) return 'Орындалды'
+  if (isIssuedStatus.value) return 'Берілді'
+  if (isAcceptedStatus.value) return 'Қабылданды'
+  if (isRejectedStatus.value) return 'Қабылданбады'
+  if (statusLower.value.includes('не найдена')) return t.value.notFound
+  return statusResult.value
+})
+
 const trackRequest = async () => {
   // Проверка заполнения данных
   if (!track.value || !password.value) {
-    alert('Введите трек-номер и пароль')
+    alert(t.value.missingFieldsAlert)
     return
   }
 
   if (track.value.length !== 12 || password.value.length !== 8) {
-    alert('Некорректная длина трек-номера или пароля')
+    alert(t.value.invalidLengthAlert)
     return
   }
 

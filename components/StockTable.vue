@@ -1,5 +1,29 @@
 <template>
   <section class="w-full max-w-6xl mx-auto px-3 sm:px-4 space-y-5">
+    <div v-if="notifications.length" class="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm space-y-3">
+      <div>
+        <h3 class="text-base font-semibold text-amber-950">Уведомления</h3>
+      </div>
+
+      <article
+        v-for="notification in notifications"
+        :key="notification.id"
+        class="flex flex-col gap-3 rounded-lg border border-amber-200 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p class="text-sm font-medium text-slate-900">{{ notification.message }}</p>
+          <p class="mt-1 text-xs text-slate-500">{{ formatDateTime(notification.created_at) }}</p>
+        </div>
+        <button
+          type="button"
+          class="shrink-0 rounded border border-amber-300 px-3 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+          @click="markNotificationRead(notification.id)"
+        >
+          Прочитано
+        </button>
+      </article>
+    </div>
+
     <div class="rounded-xl border bg-white p-4 shadow-sm space-y-4">
       <div>
         <h3 class="text-base font-semibold">Приход на склад</h3>
@@ -135,7 +159,7 @@
               <th class="p-2 border text-left">Устройство</th>
               <th class="p-2 border text-left">Тип</th>
               <th class="p-2 border text-left">Количество</th>
-              <th class="p-2 border text-left">Кто</th>
+              <th class="p-2 border text-left">Оператор</th>
               <th class="p-2 border text-left">Комментарий</th>
             </tr>
           </thead>
@@ -186,8 +210,15 @@ type StockMovement = {
   productLabel: string
 }
 
+type AdminNotification = {
+  id: number
+  message: string
+  created_at: string
+}
+
 const products = ref<StockProduct[]>([])
 const recentMovements = ref<StockMovement[]>([])
+const notifications = ref<AdminNotification[]>([])
 const receiptProductName = ref('')
 const receiptColor = ref('')
 const receiptQuantity = ref<number | null>(null)
@@ -240,6 +271,28 @@ async function load() {
   }
 }
 
+async function loadNotifications() {
+  try {
+    const response = await $fetch<{ notifications: AdminNotification[] }>('/api/admin-notifications')
+    notifications.value = response.notifications
+  } catch (e: any) {
+    error.value = e?.statusMessage || 'Ошибка загрузки уведомлений'
+  }
+}
+
+async function markNotificationRead(id: number) {
+  error.value = ''
+  try {
+    await $fetch('/api/admin-notifications/read', {
+      method: 'POST',
+      body: { id }
+    })
+    notifications.value = notifications.value.filter((notification) => notification.id !== id)
+  } catch (e: any) {
+    error.value = e?.statusMessage || 'Ошибка обновления уведомления'
+  }
+}
+
 async function submitReceipt() {
   error.value = ''
   success.value = ''
@@ -270,6 +323,7 @@ async function submitReceipt() {
     receiptQuantity.value = null
     receiptNote.value = ''
     await load()
+    await loadNotifications()
   } catch (e: any) {
     error.value = e?.statusMessage || 'Ошибка сохранения прихода'
   }
@@ -295,5 +349,8 @@ function movementTypeLabel(type: string) {
   return type
 }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  await loadNotifications()
+})
 </script>
