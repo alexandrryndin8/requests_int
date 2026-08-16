@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+
 type ChatMessage = {
   role: "user" | "assistant";
   text: string;
+  html?: string;
 };
 
 type ChatApiMessage = {
-  role: "system" | "user" | "assistant";
+  role: "user" | "assistant";
   content: string;
 };
 
@@ -16,25 +20,6 @@ type ChatApiResponse = {
     };
   }>;
 };
-
-const systemPrompt = `
-Do not write words in English in your answer such as clickable and tracking number replace them with Russian ones.
-Always answer in the same language as the user's last message. If the user writes in Russian, answer in Russian.
-Use only the company information from this system prompt. 
-You are an assistant consultant at Integro.
-Their office is located in Petropavlovsk: K. Sutyusheva 53, and their phone number is +7 7152 50 09 19. 
-You manufacture access control devices for schoolchildren and college students.
-You produce three types of devices: a card, a bracelet, and a key fob. Reply with information to the user only if he has requested it don't write a lot of text that which was not requested.
-If you don't know how to answer a question, recommend calling +7 7152 50 09 19 during business hours, 9:00 AM-6:00 PM lunch at the company from 13:00 to 14:00, Monday through Friday.
-Be sure to be polite. There is no delivery of orders; everything is picked up from our office.
-To receive your device, you need to submit a request on our website or through the Telegram bot.
-Payment for groceries upon receiving is accepted in cash, by bank card, or by Kaspi QR code. No bank transfers.
-On the website's homepage, there's a clickable QR code that leads to the Telegram bot for submitting requests.
-You can also submit a request on the website by clicking the "Оставить заявку" button. Fill out the form and wait for it to be processed.
-You can check your request on the website by going to the "Проверить заявку" page and entering the tracking number and password.
-You must save the tracking number and password provided to check your request on the website.
-Make blocks of text logically separated from each other by spaces; continuous text is difficult for the visitor to read.
-`;
 
 const isOpen = ref(false);
 const message = ref("");
@@ -71,12 +56,7 @@ const messages = ref<ChatMessage[]>([
   },
 ]);
 
-const chatHistory = ref<ChatApiMessage[]>([
-  {
-    role: "system",
-    content: systemPrompt,
-  },
-]);
+const chatHistory = ref<ChatApiMessage[]>([]);
 
 const canSend = computed(
   () => message.value.trim().length > 0 && !isLoading.value,
@@ -97,8 +77,9 @@ watch(selectedLanguage, () => {
   }
 });
 
-const formatBotText = (text: string) => {
-  return text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+const renderMarkdown = (text: string) => {
+  const rawHtml = marked.parse(text, { breaks: true, async: false }) as string;
+  return DOMPurify.sanitize(rawHtml);
 };
 
 const generateBotResponse = async (userMessage: string) => {
@@ -107,10 +88,7 @@ const generateBotResponse = async (userMessage: string) => {
     content: userMessage,
   });
 
-  const [systemMessage, ...conversationMessages] = chatHistory.value;
-  const requestMessages = systemMessage
-    ? [systemMessage, ...conversationMessages.slice(-maxHistoryMessages)]
-    : conversationMessages.slice(-maxHistoryMessages);
+  const requestMessages = chatHistory.value.slice(-maxHistoryMessages);
 
   const data = await $fetch<ChatApiResponse>("/api/chat", {
     method: "POST",
@@ -125,7 +103,7 @@ const generateBotResponse = async (userMessage: string) => {
     throw new Error("Бот вернул пустой ответ.");
   }
 
-  const botText = formatBotText(apiResponseText);
+  const botText = apiResponseText.trim();
 
   chatHistory.value.push({
     role: "assistant",
@@ -135,6 +113,7 @@ const generateBotResponse = async (userMessage: string) => {
   messages.value.push({
     role: "assistant",
     text: botText,
+    html: renderMarkdown(botText),
   });
 };
 
@@ -154,11 +133,15 @@ const sendMessage = async () => {
 
   try {
     await generateBotResponse(userMessage);
-  } catch (error) {
-    errorText.value =
-      error instanceof Error
-        ? error.message
-        : "Произошла ошибка при отправке сообщения.";
+  } catch (error: any) {
+    if (error?.status === 429 || error?.statusCode === 429) {
+      errorText.value = "Достигнут лимит сообщений. Подождите немного.";
+    } else {
+      errorText.value =
+        error instanceof Error
+          ? error.message
+          : "Произошла ошибка при отправке сообщения.";
+    }
   } finally {
     isLoading.value = false;
   }
@@ -208,15 +191,16 @@ const sendMessage = async () => {
             "
           >
             <p
-              class="max-w-[82%] whitespace-pre-line break-words rounded-lg px-3 py-2 text-sm leading-5 shadow-sm"
-              :class="
-                chatMessage.role === 'user'
-                  ? 'bg-[#3FB1F3] text-white'
-                  : 'border border-slate-200 bg-white text-slate-800'
-              "
+              v-if="chatMessage.role === 'user'"
+              class="max-w-[82%] whitespace-pre-line break-words rounded-lg bg-[#3FB1F3] px-3 py-2 text-sm leading-5 text-white shadow-sm"
             >
               {{ chatMessage.text }}
             </p>
+            <div
+              v-else
+              class="chat-markdown max-w-[82%] break-words rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-5 text-slate-800 shadow-sm"
+              v-html="chatMessage.html ?? chatMessage.text"
+            />
           </div>
 
           <div v-if="isLoading" class="flex justify-start">
@@ -269,3 +253,60 @@ const sendMessage = async () => {
     </button>
   </section>
 </template>
+
+<style scoped>
+.chat-markdown :deep(p) {
+  margin: 0 0 0.5em;
+}
+
+.chat-markdown :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.chat-markdown :deep(ul),
+.chat-markdown :deep(ol) {
+  margin: 0 0 0.5em;
+  padding-left: 1.25em;
+}
+
+.chat-markdown :deep(ul) {
+  list-style: disc;
+}
+
+.chat-markdown :deep(ol) {
+  list-style: decimal;
+}
+
+.chat-markdown :deep(li) {
+  margin-bottom: 0.15em;
+}
+
+.chat-markdown :deep(strong) {
+  font-weight: 600;
+}
+
+.chat-markdown :deep(a) {
+  color: #1d64d6;
+  text-decoration: underline;
+}
+
+.chat-markdown :deep(code) {
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+}
+
+.chat-markdown :deep(pre) {
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.5em;
+  overflow-x: auto;
+  margin: 0 0 0.5em;
+}
+
+.chat-markdown :deep(pre code) {
+  background: none;
+  padding: 0;
+}
+</style>

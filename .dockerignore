@@ -1,0 +1,30 @@
+# Nuxt dev/build outputs (rebuilt inside the image)
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies (installed inside the image)
+node_modules
+
+# Logs
+logs
+*.log
+
+# Env files — secrets must be injected at runtime, never baked into the image
+.env
+.env.*
+!.env.example
+
+# VCS / editor / misc
+.git
+.gitignore
+.idea
+.fleet
+.DS_Store
+*.md
+
+# Local scratch/scripts not needed inside the image
+scripts

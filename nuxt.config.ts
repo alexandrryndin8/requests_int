@@ -22,6 +22,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      title: "Интегро заявки",
       script: [
         {
           src: `https://www.google.com/recaptcha/api.js?render=${process.env.RECAPTCHA_SITE_KEY}`,
@@ -34,12 +35,16 @@ export default defineNuxtConfig({
 
   plugins: ["~/plugins/recaptcha.client.ts"],
 
-  nitro: {
-    headers: {
-      "X-Frame-Options": "DENY",
-      "Content-Security-Policy": "frame-ancestors 'none'",
+  routeRules: {
+    "/**": {
+      headers: {
+        "X-Frame-Options": "DENY",
+        "Content-Security-Policy": "frame-ancestors 'none'",
+      },
     },
+  },
 
+  nitro: {
     externals: {
       inline: ["@prisma/client"],
       external: [".prisma"],

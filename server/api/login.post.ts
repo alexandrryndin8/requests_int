@@ -2,13 +2,14 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { readBody, setCookie, createError } from 'h3'
 import { prisma } from '~/server/utils/db'
+import type { RecaptchaResponse } from '~/server/utils/recaptcha'
 
 // 🔒 Brute-force защита
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>()
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  if (!config.JWT_SECRET as string) throw createError({ statusCode: 500, message: 'JWT secret is not set' })
+  if (!(config.JWT_SECRET as string)) throw createError({ statusCode: 500, message: 'JWT secret is not set' })
 
   // IP
   const ip =
@@ -32,9 +33,30 @@ export default defineEventHandler(async (event) => {
 
   // Проверка логина/пароля
   const body = await readBody(event)
-  const { username, password } = body || {}
+  const { username, password, token: recaptchaToken } = body || {}
   if (!username || !password) {
     throw createError({ statusCode: 400, message: 'Имя пользователя и пароль обязательны' })
+  }
+
+  // Проверка reCAPTCHA
+  const devBypass = process.env.NODE_ENV === 'development' || process.env.RECAPTCHA_BYPASS === '1'
+  if (!devBypass) {
+    if (!recaptchaToken) {
+      throw createError({ statusCode: 400, message: 'No reCAPTCHA token' })
+    }
+
+    const secret = config.RECAPTCHA_SECRET_KEY as string
+    if (!secret) throw createError({ statusCode: 500, message: 'reCAPTCHA secret not set' })
+
+    const recaptchaRes = await $fetch<RecaptchaResponse>('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      body: new URLSearchParams({ secret, response: recaptchaToken }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+
+    if (!recaptchaRes.success || (recaptchaRes.score ?? 0) < 0.5) {
+      throw createError({ statusCode: 403, message: 'Не пройдена проверка reCAPTCHA' })
+    }
   }
 
   const admin = await prisma.admin.findUnique({ where: { username }, select: { id: true, username: true, hashed_password: true, is_super: true } })

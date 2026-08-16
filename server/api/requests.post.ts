@@ -1,6 +1,7 @@
 import { readBody, createError } from 'h3'
 import { prisma } from '~/server/utils/db'
 import { normalize, validateNamePart, titleCaseNamePart } from '~/server/utils/validators'
+import { enforceRateLimit } from '~/server/utils/rateLimit'
 
 interface RecaptchaResponse {
   success: boolean
@@ -13,6 +14,13 @@ interface RecaptchaResponse {
 
 export default defineEventHandler(async (event) => {
   try {
+    enforceRateLimit(event, {
+      key: 'requests',
+      limit: 10,
+      windowMs: 5 * 60 * 1000,
+      message: 'Слишком много заявок. Попробуйте через несколько минут.'
+    })
+
     const cfg = useRuntimeConfig()
     const body = await readBody(event)
 

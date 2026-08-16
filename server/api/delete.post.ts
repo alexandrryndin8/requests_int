@@ -15,6 +15,11 @@ function serializeBigInt(obj: any): any {
 }
 
 export default defineEventHandler(async (event) => {
+  const user = (event as any).context.user
+  if (!user) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  }
+
   try {
     const body = await readBody(event)
 
@@ -27,6 +32,21 @@ export default defineEventHandler(async (event) => {
     const updated = await prisma.requests.update({
       where: { track_id },
       data: { deleted: true},
+      select: {
+        id: true,
+        full_name: true,
+        school: true,
+        class: true,
+        device_type: true,
+        track_id: true,
+        status: true,
+        created_at: true,
+        source: true,
+        status_modified_at: true,
+        phone: true,
+        deleted: true,
+        telegram_id: true
+      }
     })
 
     return {

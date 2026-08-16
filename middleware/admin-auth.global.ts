@@ -8,6 +8,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const jwt = (await import('jsonwebtoken')).default
 
   const event = useRequestEvent()
+  if (!event) return navigateTo('/login')
   const token = getCookie(event, 'auth')
 
   if (!token) return navigateTo('/login')

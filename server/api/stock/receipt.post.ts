@@ -55,6 +55,9 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
+  if (!user.is_super) {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden: super admin only' })
+  }
 
   const body = await readBody(event)
   const productId = Number(body?.productId)

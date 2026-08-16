@@ -29,6 +29,11 @@ function buildDateRange(from: Date, to: Date) {
 }
 
 export default defineEventHandler(async (event) => {
+  const user = (event as any).context.user
+  if (!user) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  }
+
   const q = getQuery(event)
   const from = String(q.from || '')
   const to = String(q.to || '')
