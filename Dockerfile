@@ -39,6 +39,14 @@ ENV PORT=3000
 
 WORKDIR /app
 
+# node:*-bookworm-slim doesn't include OpenSSL by default, but the Prisma
+# query engine needs libssl at runtime to load — without this it fails with
+# a confusing "add binaryTargets to schema.prisma" error that is really
+# just a missing shared library.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
 # Non-root user to run the app
 RUN groupadd --system --gid 1001 nodejs \
   && useradd --system --uid 1001 --gid nodejs nuxtuser

@@ -45,60 +45,16 @@
 </template>
 
 <script setup lang="ts">
+import { useReCaptcha } from 'vue-recaptcha-v3'
+
 const username = ref('')
 const password = ref('')
 const error = ref('')
 
-// Инициализация reCAPTCHA
-const recaptchaLoaded = ref(false)
-const siteKey = useRuntimeConfig().public.recaptchaSiteKey
-
-const loadRecaptcha = async () => {
-  return new Promise<void>((resolve) => {
-    if (window.grecaptcha) {
-      recaptchaLoaded.value = true
-      resolve()
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`
-    script.async = true
-    script.defer = true
-    script.onload = () => {
-      recaptchaLoaded.value = true
-      resolve()
-    }
-    script.onerror = () => {
-      console.error('Failed to load reCAPTCHA script')
-      resolve()
-    }
-    document.head.appendChild(script)
-  })
-}
-
-const executeRecaptcha = async (action: string) => {
-  if (!recaptchaLoaded.value) {
-    await loadRecaptcha()
-  }
-
-  return new Promise<string>((resolve, reject) => {
-    if (!window.grecaptcha) {
-      reject(new Error('reCAPTCHA not loaded'))
-      return
-    }
-
-    window.grecaptcha.ready(() => {
-      window.grecaptcha.execute(siteKey, { action })
-        .then(resolve)
-        .catch(reject)
-    })
-  })
-}
-
-onMounted(async () => {
-  await loadRecaptcha()
-})
+// reCAPTCHA is loaded once, globally, by plugins/recaptcha.client.ts
+// (vue-recaptcha-v3). Loading the api.js script again here would create a
+// second, conflicting reCAPTCHA client and break verification.
+const { executeRecaptcha } = useReCaptcha()!
 
 async function login() {
   error.value = ''

@@ -53,8 +53,8 @@
 
 <script setup lang='ts'>
 
-import { ref, onMounted, computed } from 'vue'
-import { useRuntimeConfig } from '#imports'
+import { ref, computed } from 'vue'
+import { useReCaptcha } from 'vue-recaptcha-v3'
 
 const { selectedLanguage } = useSiteLanguage()
 
@@ -95,68 +95,17 @@ const translations = {
 
 const t = computed(() => translations[selectedLanguage.value])
 
-// Инициализация reCAPTCHA
-const recaptchaLoaded = ref(false)
+// reCAPTCHA is loaded once, globally, by plugins/recaptcha.client.ts
+// (vue-recaptcha-v3). Loading the api.js script again here would create a
+// second, conflicting reCAPTCHA client and break verification.
 const recaptchaToken = ref('')
-const siteKey = useRuntimeConfig().public.recaptchaSiteKey
+const { executeRecaptcha: executeReCaptchaV3 } = useReCaptcha()!
 
-// Загрузка reCAPTCHA
-const loadRecaptcha = async () => {
-  return new Promise<void>((resolve) => {
-    if (window.grecaptcha) {
-      recaptchaLoaded.value = true
-      resolve()
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`
-    script.async = true
-    script.defer = true
-    script.onload = () => {
-      recaptchaLoaded.value = true
-      resolve()
-    }
-    script.onerror = () => {
-      console.error('Failed to load reCAPTCHA script')
-      resolve()
-    }
-    document.head.appendChild(script)
-  })
-}
-
-// Получение токена
 const executeRecaptcha = async (action: string) => {
-  try {
-    if (!recaptchaLoaded.value) {
-      await loadRecaptcha()
-    }
-    
-    return new Promise<string>((resolve, reject) => {
-      if (!window.grecaptcha) {
-        reject(new Error('reCAPTCHA not loaded'))
-        return
-      }
-
-      window.grecaptcha.ready(() => {
-        window.grecaptcha.execute(siteKey, { action })
-          .then(token => {
-            recaptchaToken.value = token
-            resolve(token)
-          })
-          .catch(reject)
-      })
-    })
-  } catch (error) {
-    console.error('reCAPTCHA error:', error)
-    throw error
-  }
+  const token = await executeReCaptchaV3(action)
+  recaptchaToken.value = token
+  return token
 }
-
-// Инициализация при загрузке
-onMounted(async () => {
-  await loadRecaptcha()
-})
 
 
 // Механизм проверки по трек номеру 
