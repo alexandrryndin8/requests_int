@@ -5,14 +5,15 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 async function main() {
-  const hashed = await bcrypt.hash('admin123', 10)
+  const hashed = await bcrypt.hash('admin', 10)
 
   await prisma.admin.upsert({
-    where: { username: 'admin' },
+    where: { username: 'superadmin' },
     update: {},
     create: {
-      username: 'admin',
+      username: 'superadmin',
       hashed_password: hashed,
+      is_super: true,
     },
   })
 
