@@ -54,6 +54,14 @@ export default defineEventHandler(async (event) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
 
+    console.log('reCAPTCHA response (login):', {
+      success: recaptchaRes.success,
+      score: recaptchaRes.score,
+      action: recaptchaRes.action,
+      hostname: recaptchaRes.hostname,
+      errorCodes: recaptchaRes['error-codes'] || []
+    })
+
     if (!recaptchaRes.success || (recaptchaRes.score ?? 0) < 0.5) {
       throw createError({ statusCode: 403, message: 'Не пройдена проверка reCAPTCHA' })
     }
