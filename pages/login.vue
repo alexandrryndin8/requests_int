@@ -52,9 +52,15 @@ const password = ref('')
 const error = ref('')
 
 // reCAPTCHA is loaded once, globally, by plugins/recaptcha.client.ts
-// (vue-recaptcha-v3). Loading the api.js script again here would create a
-// second, conflicting reCAPTCHA client and break verification.
-const { executeRecaptcha } = useReCaptcha()!
+// (vue-recaptcha-v3), which only runs client-side. useReCaptcha() must be
+// called from a client-only context (onMounted) — calling it directly in
+// setup() also runs during SSR, where the plugin was never installed and
+// the composable returns undefined.
+let executeRecaptcha: (action: string) => Promise<string>
+
+onMounted(() => {
+  executeRecaptcha = useReCaptcha()!.executeRecaptcha
+})
 
 async function login() {
   error.value = ''

@@ -363,10 +363,12 @@ function validateGroup() {
 }
 
 // reCAPTCHA is loaded once, globally, by plugins/recaptcha.client.ts
-// (vue-recaptcha-v3). Loading the api.js script again here would create a
-// second, conflicting reCAPTCHA client and break verification.
+// (vue-recaptcha-v3), which only runs client-side. useReCaptcha() must be
+// called from a client-only context (onMounted) — calling it directly in
+// setup() also runs during SSR, where the plugin was never installed and
+// the composable returns undefined.
 const recaptchaToken = ref<string>('')
-const { executeRecaptcha } = useReCaptcha()!
+let executeRecaptcha: (action: string) => Promise<string>
 
 
 // Создание полного имени из полей 
@@ -512,6 +514,7 @@ const showRecaptchaBadge = () => {
 
 onMounted(async () => {
   if (process.client) {
+    executeRecaptcha = useReCaptcha()!.executeRecaptcha
     await executeRecaptcha('homepage')
     showRecaptchaBadge()
     // Повторная проверка каждые 2 секунды (на случай динамического скрытия)

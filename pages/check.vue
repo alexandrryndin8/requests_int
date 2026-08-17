@@ -53,7 +53,7 @@
 
 <script setup lang='ts'>
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useReCaptcha } from 'vue-recaptcha-v3'
 
 const { selectedLanguage } = useSiteLanguage()
@@ -96,10 +96,16 @@ const translations = {
 const t = computed(() => translations[selectedLanguage.value])
 
 // reCAPTCHA is loaded once, globally, by plugins/recaptcha.client.ts
-// (vue-recaptcha-v3). Loading the api.js script again here would create a
-// second, conflicting reCAPTCHA client and break verification.
+// (vue-recaptcha-v3), which only runs client-side. useReCaptcha() must be
+// called from a client-only context (onMounted) — calling it directly in
+// setup() also runs during SSR, where the plugin was never installed and
+// the composable returns undefined.
 const recaptchaToken = ref('')
-const { executeRecaptcha: executeReCaptchaV3 } = useReCaptcha()!
+let executeReCaptchaV3: (action: string) => Promise<string>
+
+onMounted(() => {
+  executeReCaptchaV3 = useReCaptcha()!.executeRecaptcha
+})
 
 const executeRecaptcha = async (action: string) => {
   const token = await executeReCaptchaV3(action)
