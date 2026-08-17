@@ -12,8 +12,12 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Install deps first (better layer caching)
+# Install deps first (better layer caching).
+# The prisma schema must be present before npm ci runs, because the
+# package.json "postinstall" script (nuxt prepare && prisma generate)
+# fires automatically during npm ci and needs prisma/schema.prisma to exist.
 COPY package.json package-lock.json ./
+COPY prisma ./prisma
 RUN npm ci
 
 # Copy the rest of the source and build
