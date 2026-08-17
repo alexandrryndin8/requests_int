@@ -43,9 +43,13 @@ WORKDIR /app
 RUN groupadd --system --gid 1001 nodejs \
   && useradd --system --uid 1001 --gid nodejs nuxtuser
 
-# Nuxt's node-server output is self-contained: it bundles its own
-# node_modules (including the generated Prisma client) inside .output
+# nuxt.config.ts explicitly marks @prisma/client (and its generated .prisma
+# engine) as external to the Nitro/Rollup bundle — it contains a native
+# binary that can't be bundled — so .output is NOT self-contained for
+# Prisma and these packages must be copied separately.
 COPY --from=builder --chown=nuxtuser:nodejs /app/.output ./.output
+COPY --from=builder --chown=nuxtuser:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nuxtuser:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
 USER nuxtuser
 
