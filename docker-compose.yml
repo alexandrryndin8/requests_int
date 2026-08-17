@@ -30,6 +30,16 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # Nuxt/Nitro only picks up runtimeConfig overrides at server startup
+      # via NUXT_-prefixed env vars (see nuxt.config.ts runtimeConfig) — the
+      # bare names below (from .env) are just for human-friendly naming and
+      # don't map to runtimeConfig on their own.
+      NUXT_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      NUXT_JWT_SECRET: ${JWT_SECRET}
+      NUXT_RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
+      NUXT_GROQ_API_KEY: ${GROQ_API_KEY}
+      NUXT_PUBLIC_RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY}
+      NUXT_PUBLIC_SITE_URL: ${SITE_URL:-http://localhost:3000}
     depends_on:
       db:
         condition: service_healthy

@@ -20,16 +20,14 @@ export default defineNuxtConfig({
     },
   },
 
+  // Note: the reCAPTCHA script itself is loaded dynamically at runtime by
+  // plugins/recaptcha.client.ts (vue-recaptcha-v3), reading the site key
+  // from runtimeConfig.public — not baked in here, since anything using
+  // process.env directly in this file is resolved at build time, before
+  // the deployment's real .env values exist.
   app: {
     head: {
       title: "Интегро заявки",
-      script: [
-        {
-          src: `https://www.google.com/recaptcha/api.js?render=${process.env.RECAPTCHA_SITE_KEY}`,
-          async: true,
-          defer: true,
-        },
-      ],
     },
   },
 
