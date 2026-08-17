@@ -81,13 +81,18 @@ export default defineEventHandler(async (event) => {
 
   const token = jwt.sign({ username: admin.username, is_super: admin.is_super}, config.JWT_SECRET as string, { expiresIn: '7d' })
 
-  // Куки
-  const isProd = process.env.NODE_ENV === 'production'
+  // Куки. "Secure" cookies are silently dropped by browsers over plain
+  // HTTP, so this must reflect the actual connection, not just NODE_ENV —
+  // otherwise the cookie never gets stored and every login "succeeds" on
+  // the server but the browser stays logged out.
+  const isHttps =
+    Boolean((event.node.req.socket as any)?.encrypted) ||
+    event.node.req.headers['x-forwarded-proto'] === 'https'
   setCookie(event, 'auth', token, {
     httpOnly: true,
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
-    secure: isProd,
+    secure: isHttps,
     sameSite: 'lax'
   })
 
