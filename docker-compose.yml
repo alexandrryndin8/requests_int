@@ -52,7 +52,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    entrypoint: ["npx", "prisma", "migrate", "deploy"]
+    # `command` (not `entrypoint`) so it can be overridden, e.g.
+    # `docker compose run --rm migrate npx prisma migrate resolve --rolled-back <name>`
+    command: ["npx", "prisma", "migrate", "deploy"]
     profiles:
       - tools
 
