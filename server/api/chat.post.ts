@@ -117,7 +117,7 @@ export default defineEventHandler(async (event) => {
         'Authorization': `Bearer ${config.GROQ_API_KEY}`,
       },
       body: {
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: requestMessages,
         temperature: 0.4,
         max_completion_tokens: 700,
